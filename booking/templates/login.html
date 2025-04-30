@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Kirish{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Kirish</h1>
+
+<form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div>
+        <label for="username" class="block text-sm font-medium">Login:</label>
+        <input type="text" name="username" id="username" class="w-full border rounded p-2" required>
+    </div>
+    <div>
+        <label for="password" class="block text-sm font-medium">Parol:</label>
+        <input type="password" name="password" id="password" class="w-full border rounded p-2" required>
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Kirish</button>
+</form>
+{% endblock %}

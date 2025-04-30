@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Tashkilotlar{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-8">Tashkilotlar</h1>
+
+<form class="mb-8 flex flex-col md:flex-row gap-4">
+    <select name="region" class="border rounded p-2">
+        <option value="">Barcha hududlar</option>
+        {% for region in regions %}
+            <option value="{{ region.id }}" {% if request.GET.region == region.id|stringformat:"s" %}selected{% endif %}>{{ region.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="category" class="border rounded p-2">
+        <option value="">Barcha kategoriyalar</option>
+        {% for category in categories %}
+            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Filtrlash</button>
+</form>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for organization in organizations %}
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-semibold mb-2">{{ organization.name }}</h2>
+            <p class="text-gray-600 mb-2">{{ organization.region.name }}</p>
+            <p class="text-gray-600 mb-4">{{ organization.category.name }}</p>
+            <a href="{% url 'booking:organization_detail' organization.slug %}" class="text-blue-600 hover:underline">Batafsil</a>
+        </div>
+    {% empty %}
+        <p>Tashkilotlar topilmadi.</p>
+    {% endfor %}
+</div>
+{% endblock %}

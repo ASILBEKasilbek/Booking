@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Bosh sahifa{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="text-4xl font-bold mb-4">Navbat Band Qilish Tizimiga Xush Kelibsiz!</h1>
+    <p class="text-lg mb-8">O‘zingizga qulay vaqt va tashkilotni tanlang va navbat band qiling.</p>
+    <a href="{% url 'booking:organization_list' %}" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">Tashkilotlarni ko‘rish</a>
+</div>
+
+<div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div>
+        <h2 class="text-2xl font-semibold mb-4">Tanlangan Hududlar</h2>
+        <ul class="space-y-2">
+            {% for region in regions %}
+                <li><a href="{% url 'booking:organization_list' %}?region={{ region.id }}" class="text-blue-600 hover:underline">{{ region.name }}</a></li>
+            {% empty %}
+                <li>Hududlar topilmadi.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
+        <h2 class="text-2xl font-semibold mb-4">Tanlangan Kategoriyalar</h2>
+        <ul class="space-y-2">
+            {% for category in categories %}
+                <li><a href="{% url 'booking:organization_list' %}?category={{ category.id }}" class="text-blue-600 hover:underline">{{ category.name }}</a></li>
+            {% empty %}
+                <li>Kategoriyalar topilmadi.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

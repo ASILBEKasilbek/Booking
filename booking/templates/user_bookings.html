@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Mening navbatlarim{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-8">Mening navbatlarim</h1>
+
+<div class="space-y-6">
+    {% for booking in bookings %}
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-semibold">{{ booking.time_slot.organization.name }}</h2>
+            <p class="text-gray-600"><strong>Vaqt:</strong> {{ booking.time_slot.start_time|date:"Y-m-d H:i" }}</p>
+            <p class="text-gray-600"><strong>Holati:</strong> {{ booking.get_status_display }}</p>
+            {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                <a href="{% url 'booking:cancel_booking' booking.id %}" class="text-red-600 hover:underline">Bekor qilish</a>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>Sizda hali navbatlar yo‘q.</p>
+    {% endfor %}
+</div>
+{% endblock %}

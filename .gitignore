@@ -1,0 +1,49 @@
+# Python fayllari
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual muhitlar
+venv/
+env/
+.venv/
+.env/
+
+# IDE va tahrirlovchi fayllari
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS fayllari
+.DS_Store
+Thumbs.db
+
+# Log fayllar
+*.log
+
+# Fayl konfiguratsiyalari
+.env
+*.sqlite3
+*.db
+
+# Pycharm
+*.iml
+*.ipr
+*.iws
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Coverage fayllari
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# Migrations (Django uchun)
+*/migrations/

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Navbat band qilish{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Navbat band qilish</h1>
+<p class="mb-4"><strong>Tashkilot:</strong> {{ time_slot.organization.name }}</p>
+<p class="mb-4"><strong>Vaqt:</strong> {{ time_slot.start_time|date:"Y-m-d H:i" }} - {{ time_slot.end_time|date:"H:i" }}</p>
+
+<form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div>
+        <label for="notes" class="block text-sm font-medium">Qaydlar (ixtiyoriy):</label>
+        <textarea name="notes" id="notes" class="w-full border rounded p-2"></textarea>
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Band qilish</button>
+</form>
+{% endblock %}
