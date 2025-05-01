@@ -3,20 +3,38 @@
 {% block title %}Mening navbatlarim{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-8">Mening navbatlarim</h1>
+<h1 class="text-3xl font-bold mb-8 text-gray-800">Mening navbatlarim</h1>
 
 <div class="space-y-6">
-    {% for booking in bookings %}
-        <div class="bg-white p-6 rounded shadow">
-            <h2 class="text-xl font-semibold">{{ booking.time_slot.organization.name }}</h2>
+    {% for booking in page_obj %}
+        <div class="card p-6">
+            <h2 class="text-xl font-semibold text-gray-800">{{ booking.time_slot.organization.name }}</h2>
             <p class="text-gray-600"><strong>Vaqt:</strong> {{ booking.time_slot.start_time|date:"Y-m-d H:i" }}</p>
             <p class="text-gray-600"><strong>Holati:</strong> {{ booking.get_status_display }}</p>
             {% if booking.status == 'pending' or booking.status == 'confirmed' %}
-                <a href="{% url 'booking:cancel_booking' booking.id %}" class="text-red-600 hover:underline">Bekor qilish</a>
+                <a href="{% url 'booking:cancel_booking' booking.id %}" class="btn-danger mt-2 inline-block">Bekor qilish</a>
             {% endif %}
         </div>
     {% empty %}
-        <p>Sizda hali navbatlar yo‘q.</p>
+        <p class="text-gray-600">Sizda hali navbatlar yo‘q.</p>
     {% endfor %}
 </div>
+
+{% if page_obj.has_other_pages %}
+    <div class="mt-8 flex justify-center space-x-2">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn-primary">Oldingi</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="px-4 py-2 bg-blue-800 text-white rounded-lg">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}" class="btn-primary">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn-primary">Keyingi</a>
+        {% endif %}
+    </div>
+{% endif %}
 {% endblock %}

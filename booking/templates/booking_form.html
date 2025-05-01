@@ -3,16 +3,18 @@
 {% block title %}Navbat band qilish{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">Navbat band qilish</h1>
-<p class="mb-4"><strong>Tashkilot:</strong> {{ time_slot.organization.name }}</p>
-<p class="mb-4"><strong>Vaqt:</strong> {{ time_slot.start_time|date:"Y-m-d H:i" }} - {{ time_slot.end_time|date:"H:i" }}</p>
+<div class="card p-8 max-w-lg mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-gray-800">Navbat band qilish</h1>
+    <p class="text-gray-600 mb-2"><strong>Tashkilot:</strong> {{ time_slot.organization.name }}</p>
+    <p class="text-gray-600 mb-4"><strong>Vaqt:</strong> {{ time_slot.start_time|date:"Y-m-d H:i" }} - {{ time_slot.end_time|date:"H:i" }}</p>
 
-<form method="post" class="space-y-4">
-    {% csrf_token %}
-    <div>
-        <label for="notes" class="block text-sm font-medium">Qaydlar (ixtiyoriy):</label>
-        <textarea name="notes" id="notes" class="w-full border rounded p-2"></textarea>
-    </div>
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Band qilish</button>
-</form>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="notes" class="block text-sm font-medium text-gray-700">Qaydlar (ixtiyoriy):</label>
+            <textarea name="notes" id="notes" class="w-full border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <button type="submit" class="btn-primary w-full">Band qilish</button>
+    </form>
+</div>
 {% endblock %}

@@ -3,30 +3,47 @@
 {% block title %}Bosh sahifa{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="text-4xl font-bold mb-4">Navbat Band Qilish Tizimiga Xush Kelibsiz!</h1>
-    <p class="text-lg mb-8">O‘zingizga qulay vaqt va tashkilotni tanlang va navbat band qiling.</p>
-    <a href="{% url 'booking:organization_list' %}" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">Tashkilotlarni ko‘rish</a>
+<div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-12 text-center rounded-lg shadow-lg">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">Navbat Band Qilish Tizimi</h1>
+    <p class="text-lg md:text-xl mb-8">O‘zingizga qulay vaqt va tashkilotni tanlang!</p>
+    <a href="{% url 'booking:organization_list' %}" class="btn-primary text-lg">Tashkilotlarni ko‘rish</a>
 </div>
+
+{% if announcements %}
+<div class="mt-12">
+    <h2 class="text-3xl font-semibold mb-6 text-gray-800">E’lonlar</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for announcement in announcements %}
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">{{ announcement.title }}</h3>
+                <p class="text-gray-600 mb-4">{{ announcement.content|truncatewords:30 }}</p>
+                <p class="text-sm text-gray-500">Hudud: {{ announcement.region.name }}</p>
+            </div>
+        {% empty %}
+            <p class="text-gray-600">E’lonlar topilmadi.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
 <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
     <div>
-        <h2 class="text-2xl font-semibold mb-4">Tanlangan Hududlar</h2>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800">Tanlangan Hududlar</h2>
         <ul class="space-y-2">
             {% for region in regions %}
                 <li><a href="{% url 'booking:organization_list' %}?region={{ region.id }}" class="text-blue-600 hover:underline">{{ region.name }}</a></li>
             {% empty %}
-                <li>Hududlar topilmadi.</li>
+                <li class="text-gray-600">Hududlar topilmadi.</li>
             {% endfor %}
         </ul>
     </div>
     <div>
-        <h2 class="text-2xl font-semibold mb-4">Tanlangan Kategoriyalar</h2>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800">Tanlangan Kategoriyalar</h2>
         <ul class="space-y-2">
             {% for category in categories %}
                 <li><a href="{% url 'booking:organization_list' %}?category={{ category.id }}" class="text-blue-600 hover:underline">{{ category.name }}</a></li>
             {% empty %}
-                <li>Kategoriyalar topilmadi.</li>
+                <li class="text-gray-600">Kategoriyalar topilmadi.</li>
             {% endfor %}
         </ul>
     </div>

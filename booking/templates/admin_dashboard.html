@@ -3,18 +3,50 @@
 {% block title %}Admin paneli{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-8">Admin paneli</h1>
+<h1 class="text-3xl font-bold mb-8 text-gray-800">Admin paneli</h1>
 
-<h2 class="text-2xl font-semibold mb-4">Sizning tashkilotlaringiz</h2>
-<div class="space-y-6">
+<h2 class="text-2xl font-semibold mb-4 text-gray-800">Sizning tashkilotlaringiz</h2>
+<div class="space-y-6 mb-8">
     {% for organization in organizations %}
-        <div class="bg-white p-6 rounded shadow">
-            <h3 class="text-xl font-semibold">{{ organization.name }}</h3>
+        <div class="card p-6">
+            <h3 class="text-xl font-semibold text-gray-800">{{ organization.name }}</h3>
             <p class="text-gray-600">{{ organization.region.name }} - {{ organization.category.name }}</p>
-            <a href="{% url 'booking:add_time_slot' %}" class="text-blue-600 hover:underline">Vaqt sloti qo‘shish</a>
+            <div class="mt-4 space-x-4">
+                <a href="{% url 'booking:add_time_slot' %}" class="btn-primary">Vaqt sloti qo‘shish</a>
+                <a href="{% url 'booking:generate_recurring_slots' %}" class="btn-primary">Slotlarni generatsiya qilish</a>
+            </div>
         </div>
     {% empty %}
-        <p>Tashkilotlar topilmadi.</p>
+        <p class="text-gray-600">Tashkilotlar topilmadi.</p>
+    {% endfor %}
+</div>
+
+<h2 class="text-2xl font-semibold mb-4 text-gray-800">So‘nggi navbatlar</h2>
+<div class="space-y-4 mb-8">
+    {% for booking in bookings %}
+        <div class="card p-4">
+            <p class="font-semibold text-gray-800">{{ booking.time_slot.organization.name }}</p>
+            <p class="text-gray-600">Foydalanuvchi: {{ booking.user.username }}</p>
+            <p class="text-gray-600">Vaqt: {{ booking.time_slot.start_time|date:"Y-m-d H:i" }}</p>
+            <p class="text-gray-600">Holati: {{ booking.get_status_display }}</p>
+        </div>
+    {% empty %}
+        <p class="text-gray-600">Navbatlar yo‘q.</p>
+    {% endfor %}
+</div>
+
+<h2 class="text-2xl font-semibold mb-4 text-gray-800">Statistika (Oxirgi 30 kun)</h2>
+<div class="space-y-4">
+    {% for stat in stats %}
+        <div class="card p-4">
+            <p class="font-semibold text-gray-800">{{ stat.organization.name }} - {{ stat.date }}</p>
+            <p class="text-gray-600">Jami navbatlar: {{ stat.total_bookings }}</p>
+            <p class="text-gray-600">Bekor qilingan: {{ stat.cancelled_bookings }}</p>
+            <p class="text-gray-600">O‘rtacha kutish vaqti: {{ stat.average_waiting_time }} daqiqa</p>
+            <p class="text-gray-600">Mijozlar qoniqish bahosi: {{ stat.satisfaction_score }}</p>
+        </div>
+    {% empty %}
+        <p class="text-gray-600">Statistika ma’lumotlari yo‘q.</p>
     {% endfor %}
 </div>
 {% endblock %}

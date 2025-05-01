@@ -3,22 +3,52 @@
 {% block title %}{{ organization.name }}{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">{{ organization.name }}</h1>
-<p class="text-gray-600 mb-2"><strong>Hudud:</strong> {{ organization.region.name }}</p>
-<p class="text-gray-600 mb-2"><strong>Kategoriya:</strong> {{ organization.category.name }}</p>
-<p class="text-gray-600 mb-2"><strong>Manzil:</strong> {{ organization.address }}</p>
-<p class="text-gray-600 mb-8"><strong>Telefon:</strong> {{ organization.phone|default:"Ma'lumot yo'q" }}</p>
+<div class="bg-gradient-to-r from-blue-100 to-indigo-100 p-8 rounded-lg shadow-lg mb-8">
+    <h1 class="text-3xl font-bold mb-4 text-gray-800">{{ organization.name }}</h1>
+    <p class="text-gray-600 mb-2"><strong>Hudud:</strong> {{ organization.region.name }}</p>
+    <p class="text-gray-600 mb-2"><strong>Kategoriya:</strong> {{ organization.category.name }}</p>
+    <p class="text-gray-600 mb-2"><strong>Manzil:</strong> {{ organization.address }}</p>
+    <p class="text-gray-600 mb-4"><strong>Telefon:</strong> {{ organization.phone|default:"Ma'lumot yo'q" }}</p>
+</div>
 
-<h2 class="text-2xl font-semibold mb-4">Mavjud vaqt slotlari</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {% for slot in time_slots %}
-        <div class="bg-white p-4 rounded shadow">
-            <p class="font-semibold">{{ slot.start_time|date:"Y-m-d H:i" }} - {{ slot.end_time|date:"H:i" }}</p>
-            <p class="text-gray-600">Davomiylik: {{ slot.duration }} daqiqa</p>
-            <a href="{% url 'booking:book_slot' slot.id %}" class="text-blue-600 hover:underline">Band qilish</a>
-        </div>
+<h2 class="text-2xl font-semibold mb-4 text-gray-800">Ish vaqtlari</h2>
+<div class="card p-6 mb-8">
+    {% for wh in working_hours %}
+        <p class="text-gray-600">{{ wh.get_day_of_week_display }}: 
+            {% if wh.is_closed %}Yopiq{% else %}{{ wh.opening_time }} - {{ wh.closing_time }}{% endif %}
+        </p>
     {% empty %}
-        <p>Hozircha vaqt slotlari yo‘q.</p>
+        <p class="text-gray-600">Ish vaqtlari haqida ma’lumot yo‘q.</p>
     {% endfor %}
 </div>
+
+<h2 class="text-2xl font-semibold mb-4 text-gray-800">Mavjud vaqt slotlari</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    {% for slot in time_slots %}
+        <div class="card p-4">
+            <p class="font-semibold text-gray-800">{{ slot.start_time|date:"Y-m-d H:i" }} - {{ slot.end_time|date:"H:i" }}</p>
+            <p class="text-gray-600">Davomiylik: {{ slot.duration }} daqiqa</p>
+            <a href="{% url 'booking:book_slot' slot.id %}" class="btn-primary mt-2 inline-block">Band qilish</a>
+        </div>
+    {% empty %}
+        <p class="text-gray-600">Hozircha vaqt slotlari yo‘q.</p>
+    {% endfor %}
+</div>
+
+<h2 class="text-2xl font-semibold mb-4 text-gray-800">Sharhlar</h2>
+<div class="space-y-4 mb-8">
+    {% for review in reviews %}
+        <div class="card p-4">
+            <p class="font-semibold text-gray-800">{{ review.user.username|default:"Anonim" }}</p>
+            <p class="text-yellow-500">★ {{ review.rating }}</p>
+            <p class="text-gray-600">{{ review.comment|truncatewords:50 }}</p>
+        </div>
+    {% empty %}
+        <p class="text-gray-600">Sharhlar yo‘q.</p>
+    {% endfor %}
+</div>
+
+{% if user.is_authenticated %}
+    <a href="{% url 'booking:submit_review' organization.id %}" class="btn-primary">Sharh qoldirish</a>
+{% endif %}
 {% endblock %}

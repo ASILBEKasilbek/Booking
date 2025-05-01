@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Sharh qoldirish{% endblock %}
+
+{% block content %}
+<div class="card p-8 max-w-lg mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-gray-800">Sharh qoldirish: {{ organization.name }}</h1>
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="rating" class="block text-sm font-medium text-gray-700">Baholash (1-5):</label>
+            <input type="number" name="rating" id="rating" min="1" max="5" required class="w-full border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="comment" class="block text-sm font-medium text-gray-700">Izoh:</label>
+            <textarea name="comment" id="comment" class="w-full border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <div>
+            <label for="is_anonymous" class="inline-flex items-center">
+                <input type="checkbox" name="is_anonymous" id="is_anonymous" class="mr-2">
+                Anonim sharh
+            </label>
+        </div>
+        <button type="submit" class="btn-primary w-full">Yuborish</button>
+    </form>
+</div>
+{% endblock %}

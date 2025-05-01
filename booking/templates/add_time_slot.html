@@ -3,11 +3,14 @@
 {% block title %}Vaqt sloti qo‘shish{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">Vaqt sloti qo‘shish</h1>
+<div class="card p-8 max-w-lg mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-gray-800">Vaqt sloti qo‘shish</h1>
+    <p class="text-gray-600 mb-4"><strong>Tashkilot:</strong> {{ organization.name }}</p>
 
-<form method="post" class="space-y-4">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Qo‘shish</button>
-</form>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary w-full">Qo‘shish</button>
+    </form>
+</div>
 {% endblock %}

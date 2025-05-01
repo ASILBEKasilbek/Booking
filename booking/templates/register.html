@@ -3,11 +3,13 @@
 {% block title %}Ro‘yxatdan o‘tish{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">Ro‘yxatdan o‘tish</h1>
+<div class="card p-8 max-w-lg mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-gray-800">Ro‘yxatdan o‘tish</h1>
 
-<form method="post" class="space-y-4">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Ro‘yxatdan o‘tish</button>
-</form>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary w-full">Ro‘yxatdan o‘tish</button>
+    </form>
+</div>
 {% endblock %}

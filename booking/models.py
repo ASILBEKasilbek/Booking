@@ -16,11 +16,11 @@ class TimestampedModel(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
 
     class Meta:
+
         abstract = True
 
 
 class Region(TimestampedModel):
-    # O'zgarish: is_featured qo'shildi, nom validatsiyasi mustahkamlandi
     name = models.CharField(
         max_length=100,
         validators=[MinLengthValidator(2), RegexValidator(r'^[\w\s-]+$')],
@@ -44,7 +44,7 @@ class Region(TimestampedModel):
         verbose_name_plural = "Hududlar"
         ordering = ['name']
         indexes = [
-            models.Index(fields=['slug', 'is_featured']),
+            models.Index(fields=['slug']),
         ]
 
     def __str__(self):
@@ -52,7 +52,7 @@ class Region(TimestampedModel):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.name)
+            base_slug = slugify(self.name, allow_unicode=True)
             self.slug = base_slug
             counter = 1
             while Region.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
@@ -62,7 +62,6 @@ class Region(TimestampedModel):
 
 
 class Category(TimestampedModel):
-    # O'zgarish: is_featured va display_order qo'shildi
     name = models.CharField(
         max_length=100,
         validators=[MinLengthValidator(2), RegexValidator(r'^[\w\s-]+$')],
@@ -89,7 +88,7 @@ class Category(TimestampedModel):
         verbose_name_plural = "Kategoriyalar"
         ordering = ['display_order', 'name']
         indexes = [
-            models.Index(fields=['slug', 'is_featured']),
+            models.Index(fields=['slug']),
         ]
 
     def __str__(self):
@@ -97,7 +96,7 @@ class Category(TimestampedModel):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.name)
+            base_slug = slugify(self.name, allow_unicode=True)
             self.slug = base_slug
             counter = 1
             while Category.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
@@ -107,7 +106,6 @@ class Category(TimestampedModel):
 
 
 class WorkingHours(models.Model):
-    # Yangi model: JSON o'rniga aniq tuzilma
     organization = models.ForeignKey(
         'Organization',
         on_delete=models.CASCADE,
@@ -117,13 +115,13 @@ class WorkingHours(models.Model):
     day_of_week = models.CharField(
         max_length=20,
         choices=[
-            ('Monday', 'Dushanba'),
-            ('Tuesday', 'Seshanba'),
-            ('Wednesday', 'Chorshanba'),
-            ('Thursday', 'Payshanba'),
-            ('Friday', 'Juma'),
-            ('Saturday', 'Shanba'),
-            ('Sunday', 'Yakshanba'),
+            ('Monday', 'Monday'),
+            ('Tuesday', 'Tuesday'),
+            ('Wednesday', 'Wednesday'),
+            ('Thursday', 'Thursday'),
+            ('Friday', 'Friday'),
+            ('Saturday', 'Saturday'),
+            ('Sunday', 'Sunday'),
         ],
         verbose_name="Hafta kuni"
     )
@@ -135,19 +133,22 @@ class WorkingHours(models.Model):
         verbose_name = "Ish vaqti"
         verbose_name_plural = "Ish vaqtlari"
         unique_together = ['organization', 'day_of_week']
+        indexes = [
+            models.Index(fields=['organization', 'day_of_week']),
+        ]
 
     def __str__(self):
         return f"{self.organization} - {self.get_day_of_week_display()}"
 
 
 class Organization(TimestampedModel):
-    # O'zgarish: email validatsiyasi kuchaytirildi, is_verified qo'shildi
     name = models.CharField(
         max_length=200,
         validators=[MinLengthValidator(3), RegexValidator(r'^[\w\s-]+$')],
         db_index=True,
         verbose_name="Tashkilot nomi"
     )
+    slug = models.SlugField(max_length=220, unique=True, blank=True, help_text="URL uchun qisqa nom")
     region = models.ForeignKey(
         Region,
         on_delete=models.CASCADE,
@@ -169,7 +170,7 @@ class Organization(TimestampedModel):
         verbose_name="Tashkilot administratori"
     )
     address = models.TextField(verbose_name="Manzil")
-    phone = PhoneNumberField(blank=True, verbose_name="Telefon")
+    phone = PhoneNumberField(blank=True, region="UZ", verbose_name="Telefon")
     email = models.EmailField(
         blank=True,
         validators=[RegexValidator(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')],
@@ -185,15 +186,25 @@ class Organization(TimestampedModel):
         ordering = ['name']
         unique_together = ['name', 'region']
         indexes = [
-            models.Index(fields=['name', 'region', 'is_verified']),
+            models.Index(fields=['name', 'region']),
+            models.Index(fields=['slug']),
         ]
 
     def __str__(self):
         return f"{self.name} ({self.region})"
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name, allow_unicode=True)
+            self.slug = base_slug
+            counter = 1
+            while Organization.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{base_slug}-{counter}"
+                counter += 1
+        super().save(*args, **kwargs)
+
 
 class TimeSlot(TimestampedModel):
-    # O'zgarish: is_booked maydoni qo'shildi, clean metodi optimallashtirildi
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -222,7 +233,7 @@ class TimeSlot(TimestampedModel):
         ordering = ['start_time']
         unique_together = ['organization', 'start_time']
         indexes = [
-            models.Index(fields=['start_time', 'organization', 'is_booked']),
+            models.Index(fields=['organization', 'start_time']),
         ]
 
     def __str__(self):
@@ -245,7 +256,6 @@ class TimeSlot(TimestampedModel):
             ).exclude(pk=self.pk)
             if overlapping_slots.exists():
                 raise ValidationError("Bu vaqt oralig‘i boshqa slot bilan to‘qnashmoqda.")
-            # Tashkilot ish vaqtlarini tekshirish
             working_hours = WorkingHours.objects.filter(
                 organization=self.organization,
                 day_of_week=self.start_time.strftime('%A'),
@@ -253,21 +263,20 @@ class TimeSlot(TimestampedModel):
             )
             if not working_hours.filter(
                 opening_time__lte=self.start_time.time(),
-                closing_time__gte=self.end_time.time()
+                closing_time__gte=end_time.time()
             ).exists():
                 raise ValidationError("Bu vaqt tashkilot ish vaqtidan tashqarida.")
 
 
 class RecurringTimeSlot(TimestampedModel):
-    # O'zgarish: end_date qo'shildi
     DAYS_OF_WEEK = [
-        ('Monday', 'Dushanba'),
-        ('Tuesday', 'Seshanba'),
-        ('Wednesday', 'Chorshanba'),
-        ('Thursday', 'Payshanba'),
-        ('Friday', 'Juma'),
-        ('Saturday', 'Shanba'),
-        ('Sunday', 'Yakshanba'),
+        ('Monday', 'Monday'),
+        ('Tuesday', 'Tuesday'),
+        ('Wednesday', 'Wednesday'),
+        ('Thursday', 'Thursday'),
+        ('Friday', 'Friday'),
+        ('Saturday', 'Saturday'),
+        ('Sunday', 'Sunday'),
     ]
 
     organization = models.ForeignKey(
@@ -299,13 +308,15 @@ class RecurringTimeSlot(TimestampedModel):
         verbose_name = "Takrorlanadigan vaqt oralig‘i"
         verbose_name_plural = "Takrorlanadigan vaqt oralig‘lari"
         ordering = ['day_of_week', 'start_time']
+        indexes = [
+            models.Index(fields=['organization', 'day_of_week']),
+        ]
 
     def __str__(self):
         return f"{self.organization} - {self.get_day_of_week_display()} {self.start_time}"
 
 
 class Booking(TimestampedModel):
-    # O'zgarish: max bookings chegarasi sozlamalar orqali boshqariladi
     STATUS_CHOICES = [
         ('pending', 'Kutmoqda'),
         ('confirmed', 'Tasdiqlangan'),
@@ -351,7 +362,7 @@ class Booking(TimestampedModel):
         ordering = ['-created_at']
         unique_together = ['user', 'time_slot']
         indexes = [
-            models.Index(fields=['status', 'created_at', 'user']),
+            models.Index(fields=['user', 'status']),
         ]
 
     def __str__(self):
@@ -376,7 +387,6 @@ class Booking(TimestampedModel):
 
 
 class Profile(TimestampedModel):
-    # O'zgarish: timezone va notification_preferences qo'shildi
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -385,7 +395,7 @@ class Profile(TimestampedModel):
     )
     first_name = models.CharField(max_length=100, blank=True, verbose_name="Ism")
     last_name = models.CharField(max_length=100, blank=True, verbose_name="Familiya")
-    phone_number = PhoneNumberField(blank=True, verbose_name="Telefon raqami")
+    phone_number = PhoneNumberField(blank=True, region="UZ", verbose_name="Telefon raqami")
     language_preference = models.CharField(
         max_length=10,
         choices=[('uz', 'O‘zbek'), ('en', 'English')],
@@ -419,13 +429,15 @@ class Profile(TimestampedModel):
     class Meta:
         verbose_name = "Profil"
         verbose_name_plural = "Profillar"
+        indexes = [
+            models.Index(fields=['user']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} profili"
 
 
 class Announcement(TimestampedModel):
-    # O'zgarish: start_date va end_date qo'shildi
     region = models.ForeignKey(
         Region,
         on_delete=models.CASCADE,
@@ -448,27 +460,32 @@ class Announcement(TimestampedModel):
         blank=True,
         verbose_name="Tugash sanasi"
     )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Faol"
+    )
 
     class Meta:
         verbose_name = "E’lon"
         verbose_name_plural = "E’lonlar"
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['region', 'start_date', 'priority']),
+            models.Index(fields=['region', 'start_date']),
         ]
 
     def __str__(self):
         return f"{self.region} - {self.title}"
-    
-    @property
-    def is_active(self):
+
+    def save(self, *args, **kwargs):
         today = timezone.now().date()
-        return (self.start_date <= today and 
-                (self.end_date is None or self.end_date >= today))
+        self.is_active = (
+            self.start_date <= today and
+            (self.end_date is None or self.end_date >= today)
+        )
+        super().save(*args, **kwargs)
 
 
 class Notification(TimestampedModel):
-    # O'zgarish: notification_type qo'shildi
     NOTIFICATION_TYPES = [
         ('email', 'Email'),
         ('push', 'Push'),
@@ -508,7 +525,7 @@ class Notification(TimestampedModel):
         verbose_name_plural = "Xabarnomalar"
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['user', 'is_read', 'notification_type']),
+            models.Index(fields=['user', 'is_read']),
         ]
 
     def __str__(self):
@@ -516,7 +533,6 @@ class Notification(TimestampedModel):
 
 
 class Review(TimestampedModel):
-    # O'zgarish: is_anonymous qo'shildi
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -551,7 +567,6 @@ class Review(TimestampedModel):
 
 
 class OrganizationStats(TimestampedModel):
-    # O'zgarish: average_waiting_time va satisfaction_score qo'shildi
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
